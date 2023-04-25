@@ -129,14 +129,13 @@ function addItem(e){
     
         var li = e.target.parentElement;
         var tar = li.firstChild.textContent.split(',')
-        if(parseInt(tar[2])==0 || parseInt(tar[2])<0){
+        if(tar[2]<= 1){
           confirm("Out of Stock , come back Later")
           return
+
         }
         var quantity = parseInt(tar[2])-2
-        
         tar.splice(2,1)
-        console.log(tar)
         li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[2]}`  
         let ob = {
           name : tar[0] ,
