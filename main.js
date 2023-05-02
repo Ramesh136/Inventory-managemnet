@@ -1,6 +1,6 @@
 const btn = document.getElementById("add");
 const itemList = document.getElementById("itemList");
-
+const crud = "45caa0a4234a4e978baf8ef43c176893"
 
 btn.addEventListener('click',addItem);
 window.addEventListener("DOMContentLoaded" , loaData)
@@ -8,7 +8,7 @@ itemList.addEventListener('click', buy);
 
 function loaData(){
 
-  axios.get("https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList").then(response=>{
+  axios.get(`https://crudcrud.com/api/${crud}/InventoryList`).then(response=>{
     console.log(response.data)
     data = response.data
     len = data.length
@@ -42,7 +42,7 @@ async function addItem(e){
       price : price.value
     }
 
-    await axios.post("https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList", ob).then(response=>{
+    await axios.post(`https://crudcrud.com/api/${crud}/InventoryList`, ob).then(response=>{
       console.log(response.data._id)
       var item = createList(name.value , desc.value , quantity.value , price.value , response.data._id)
     
@@ -121,7 +121,7 @@ async function addItem(e){
 
         
 
-        axios.put(`https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
+        axios.put(`https://crudcrud.com/api/${crud}/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
         li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[3]},${tar[4]}`  
         let ob = {
           name : tar[0] ,
@@ -169,7 +169,7 @@ async function addItem(e){
 
         
 
-        axios.put(`https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
+        axios.put(`https://crudcrud.com/api/${crud}/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
         li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[3]},${tar[4]}`  
         let ob = {
           name : tar[0] ,
