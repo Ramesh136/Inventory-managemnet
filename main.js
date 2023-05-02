@@ -7,27 +7,26 @@ window.addEventListener("DOMContentLoaded" , loaData)
 itemList.addEventListener('click', buy);
 
 function loaData(){
-  len = localStorage.length
 
-    for(a in localStorage){
-      if(len>0){
-        item = localStorage.getItem(a)
-        let obd = JSON.parse(item);
-        var a = []
-        for(key in obd){
-          a.push(obd[key])
-        }
-        var list = createList(a[0],a[1],a[2],a[3])
-        itemList.appendChild(list);
-      len--
+  axios.get("https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList").then(response=>{
+    console.log(response.data)
+    data = response.data
+    len = data.length
+    for(var i = 0 ;i<len ; i++){
+      var a = []
+      for(key in data[i]){
+        a.push(data[i][key])
       }
-      else
-        break
-    } 
+      var list = createList(a[1],a[2],a[3],a[4],a[0])
+      itemList.appendChild(list);
+      //console.log(a)
+    }
+  })
+  
 }
 
 
-function addItem(e){
+async function addItem(e){
     e.preventDefault();
   
     // Get input value
@@ -43,31 +42,36 @@ function addItem(e){
       price : price.value
     }
 
-
-    //axios.post("https://crudcrud.com/223899641e5d4f249c728d4620a0386b/itemList", ob).then(response=>console.log(response))
-    // Create new li element
-    var item = createList(name.value , desc.value , quantity.value , price.value)
+    await axios.post("https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList", ob).then(response=>{
+      console.log(response.data._id)
+      var item = createList(name.value , desc.value , quantity.value , price.value , response.data._id)
     
     // Append li to list
-    itemList.appendChild(item);
+      itemList.appendChild(item);
 
-    let obs = JSON.stringify(ob);
-    localStorage.setItem(name.value,obs);
+      let obs = JSON.stringify(ob);
+      localStorage.setItem(name.value,obs);
+    
+    
+    })
+      
 
     name.value = '';
     desc.value = '';
     quantity.value = '';
     price.value = '';
+    // Create new li element
+    
   }
 
-  function createList(name , desc ,quan ,price){
+  function createList(name , desc ,quan ,price , id){
 
     var li = document.createElement('li');
     // Add class
     li.className = 'list-group-item';
     li.id = name
     // Add text node with input value
-    li.appendChild(document.createTextNode(name+","+desc+","+quan+","+price));
+    li.appendChild(document.createTextNode(name+","+desc+","+quan+","+price+","+id));
   
     // Create del button element
     var buyOne = document.createElement('button');
@@ -108,19 +112,36 @@ function addItem(e){
           confirm("Out of Stock , come back Later")
           return
         }
+        let ob2 = {
+          name : tar[0] ,
+          desc : tar[1] ,
+          quantity : quantity ,
+          price : tar[3]
+        }
+
         
-        tar.splice(2,1)
-        // console.log(tar)
-        li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[2]}`  
-        // console.log(localStorage.getItem(tar[0]))
+
+        axios.put(`https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
+        li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[3]},${tar[4]}`  
         let ob = {
           name : tar[0] ,
           desc : tar[1] ,
           quantity : quantity ,
           price : tar[2]
         }
-        let obs = JSON.stringify(ob);
-        localStorage.setItem(tar[0],obs)
+        
+        // tar.splice(2,1)
+        // // console.log(tar)
+        // li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[2]}`  
+        // // console.log(localStorage.getItem(tar[0]))
+        // let ob = {
+        //   name : tar[0] ,
+        //   desc : tar[1] ,
+        //   quantity : quantity ,
+        //   price : tar[2]
+        // }
+        // let obs = JSON.stringify(ob);
+        // localStorage.setItem(tar[0],obs)
 
       
     }
@@ -129,14 +150,27 @@ function addItem(e){
     
         var li = e.target.parentElement;
         var tar = li.firstChild.textContent.split(',')
+
+        var id = tar[4]
+        
         if(tar[2]<= 1){
           confirm("Out of Stock , come back Later")
           return
 
         }
         var quantity = parseInt(tar[2])-2
-        tar.splice(2,1)
-        li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[2]}`  
+
+        let ob2 = {
+          name : tar[0] ,
+          desc : tar[1] ,
+          quantity : quantity ,
+          price : tar[3]
+        }
+
+        
+
+        axios.put(`https://crudcrud.com/api/2e4b643ec79e4904b43d285367ffc482/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
+        li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[3]},${tar[4]}`  
         let ob = {
           name : tar[0] ,
           desc : tar[1] ,
