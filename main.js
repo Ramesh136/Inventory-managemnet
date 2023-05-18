@@ -1,16 +1,18 @@
 const btn = document.getElementById("add");
 const itemList = document.getElementById("itemList");
-const crud = "45caa0a4234a4e978baf8ef43c176893"
+const crud = "b0448c10d002417bac859969553e9818"
 
 btn.addEventListener('click',addItem);
 window.addEventListener("DOMContentLoaded" , loaData)
 itemList.addEventListener('click', buy);
 
-function loaData(){
+  async function loaData(){
 
-  axios.get(`https://crudcrud.com/api/${crud}/InventoryList`).then(response=>{
-    console.log(response.data)
-    data = response.data
+  try{
+    var resp = await axios.get(`https://crudcrud.com/api/${crud}/InventoryList`)
+
+    console.log(resp)
+    data = resp.data
     len = data.length
     for(var i = 0 ;i<len ; i++){
       var a = []
@@ -21,12 +23,14 @@ function loaData(){
       itemList.appendChild(list);
       //console.log(a)
     }
-  })
-  
-}
+  } 
+  catch(error){
+    console.log(error)
+  }
+ }
 
 
-async function addItem(e){
+  async function addItem(e){
     e.preventDefault();
   
     // Get input value
@@ -42,70 +46,52 @@ async function addItem(e){
       price : price.value
     }
 
-    await axios.post(`https://crudcrud.com/api/${crud}/InventoryList`, ob).then(response=>{
-      console.log(response.data._id)
-      var item = createList(name.value , desc.value , quantity.value , price.value , response.data._id)
-    
-    // Append li to list
-      itemList.appendChild(item);
 
-      let obs = JSON.stringify(ob);
-      localStorage.setItem(name.value,obs);
+    try{
+      var resp = await axios.post(`https://crudcrud.com/api/${crud}/InventoryList`, ob)
+      var item = createList(name.value , desc.value , quantity.value , price.value , resp.data._id)
+    }
+    catch(error){
+      console.log(error)
+    }
     
-    
-    })
-      
-
+  // Append item  to list
+    itemList.appendChild(item);
+  
+  //make input values blank for next input
     name.value = '';
     desc.value = '';
     quantity.value = '';
     price.value = '';
-    // Create new li element
-    
   }
 
   function createList(name , desc ,quan ,price , id){
 
     var li = document.createElement('li');
-    // Add class
     li.className = 'list-group-item';
     li.id = name
-    // Add text node with input value
-    li.appendChild(document.createTextNode(name+","+desc+","+quan+","+price+","+id));
-  
-    // Create del button element
-    var buyOne = document.createElement('button');
-    buyOne.id = name+"1"
-    // Add classes to del button
-    buyOne.className = 'btn btn-danger btn-sm float-end  ms-2 1';
-  
-    // Append text node
-    buyOne.appendChild(document.createTextNode('Buy One'));
-  
-    // Append button to li
-    li.appendChild(buyOne);
-  
-    // Append li to list
-   
 
+    li.appendChild(document.createTextNode(name+"-"+desc+"-"+quan+"-"+price+"-"+id));
+  
+   // Append button buyOne to li
+    var buyOne = document.createElement('button');
+    buyOne.className = 'btn btn-danger btn-sm float-end  ms-2 1';
+    buyOne.appendChild(document.createTextNode('Buy One'));
+    li.appendChild(buyOne);
+    
+    // Append button buyTwo to li
     var buyTwo = document.createElement('button');
-    buyTwo
-    // Add classes to del button
     buyTwo.className = 'btn btn-danger btn-sm float-end  ms-2 2';
-  
-    // Append text node
     buyTwo.appendChild(document.createTextNode('Buy Two'));
-  
-    // Append button to li
     li.appendChild(buyTwo);
 
     return li ;
   }
 
-  function buy(e){
+  async function buy(e){
     if(e.target.classList.contains('1')){
         var li = e.target.parentElement;
-        var tar = li.firstChild.textContent.split(',')
+        var tar = li.firstChild.textContent.split('-')
 
         var quantity = parseInt(tar[2])-1
         if(parseInt(tar[2])==0 || parseInt(tar[2])<0){
@@ -119,37 +105,19 @@ async function addItem(e){
           price : tar[3]
         }
 
-        
-
-        axios.put(`https://crudcrud.com/api/${crud}/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
-        li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[3]},${tar[4]}`  
-        let ob = {
-          name : tar[0] ,
-          desc : tar[1] ,
-          quantity : quantity ,
-          price : tar[2]
+        try{
+          await axios.put(`https://crudcrud.com/api/${crud}/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
+          li.firstChild.textContent = `${tar[0]}-${tar[1]}-${quantity}-${tar[3]}-${tar[4]}` 
         }
-        
-        // tar.splice(2,1)
-        // // console.log(tar)
-        // li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[2]}`  
-        // // console.log(localStorage.getItem(tar[0]))
-        // let ob = {
-        //   name : tar[0] ,
-        //   desc : tar[1] ,
-        //   quantity : quantity ,
-        //   price : tar[2]
-        // }
-        // let obs = JSON.stringify(ob);
-        // localStorage.setItem(tar[0],obs)
-
-      
+        catch(error){
+          console.log(error)
+        }
     }
   
     else if(e.target.classList.contains('2')){
     
         var li = e.target.parentElement;
-        var tar = li.firstChild.textContent.split(',')
+        var tar = li.firstChild.textContent.split('-')
 
         var id = tar[4]
         
@@ -168,17 +136,14 @@ async function addItem(e){
         }
 
         
-
-        axios.put(`https://crudcrud.com/api/${crud}/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
-        li.firstChild.textContent = `${tar[0]},${tar[1]},${quantity},${tar[3]},${tar[4]}`  
-        let ob = {
-          name : tar[0] ,
-          desc : tar[1] ,
-          quantity : quantity ,
-          price : tar[2]
+        try{
+          await axios.put(`https://crudcrud.com/api/${crud}/InventoryList/${tar[4]}`, {...ob2 , _id : undefined})
+          li.firstChild.textContent = `${tar[0]}-${tar[1]}-${quantity}-${tar[3]}-${tar[4]}`  
         }
-        let obs = JSON.stringify(ob);
-        localStorage.setItem(tar[0],obs)
+        
+        catch(error){
+          console.log(error)
+        }
     }
   }
   
